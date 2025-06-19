@@ -21,8 +21,6 @@
 JsonDocument cdoc;
 PNG png;
 
-bool isPmuIRQ = false;
-
 #define GFXFF 1
 #define FF18  &FreeSans12pt7b
 // Custom are fonts added to library "TFT_eSPI\Fonts\Custom" folder
@@ -261,27 +259,6 @@ void drawMain() {
   }
 
   // touch screen actions
-  if (isPmuIRQ) {
-    isPmuIRQ = false;
-    watch.readPMU();
-    // if touchscreen is wiped from right to left, go to next activity
-    if (watch.isPekeyPositiveIrq()) {
-      sleepTime = get_pspref_timeout();
-      ps_current_activity_index = get_pspref_current_activity_index();
-      if (ps_current_activity_index < config_activities_size - 1) {
-        set_pspref_current_activity_index(ps_current_activity_index + 1);
-      } else {
-        // buzzer haptic feedback
-        //if (get_pspref_buzzer()) {
-        //  watch.buzzerBeep(100, 1000);  // beep for 100 ms at 1000 Hz
-        //}
-        watch.setWaveform(0, 1000);  // play effect
-        // play the effect!
-        watch.run();
-      }
-    }
-    watch.clearPMU();
-  }
 
   // button actions
 }
@@ -312,9 +289,6 @@ void setup() {
   Serial.println(devicemode);
 
   watch.begin();
-  watch.attachPMU([]() {
-    isPmuIRQ = true;
-  });
   watch.setRotation(2);
 
   watch.fillScreen(RGB565_BLACK_OUTER_SPACE);
