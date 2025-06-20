@@ -1,5 +1,6 @@
 #include <Arduino.h>
 #include <LilyGoLib.h>
+#include <LV_Helper.h>
 #include <WiFi.h>
 #include <FS.h>
 #include <SPIFFS.h>
@@ -13,10 +14,6 @@
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 #include <AsyncMessagePack.h>
-
-//#include <Wire.h>
-//#include <SPI.h>
-//#include "TouchDrvFT6X36.hpp"
 
 JsonDocument cdoc;
 PNG png;
@@ -289,6 +286,8 @@ void setup() {
   Serial.println(devicemode);
 
   watch.begin();
+  beginLvglHelper();
+
   watch.setRotation(2);
 
   watch.fillScreen(RGB565_BLACK_OUTER_SPACE);
