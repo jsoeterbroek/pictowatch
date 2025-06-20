@@ -4,7 +4,6 @@
 #include <WiFi.h>
 #include <FS.h>
 #include <SPIFFS.h>
-#include "ui.h"
 #include "global_flags.h"
 #include "devicemode.h"
 #include "PSpref.h"
@@ -14,6 +13,9 @@
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 #include <AsyncMessagePack.h>
+
+// ui stuff
+#include "ui.h"
 
 JsonDocument cdoc;
 PNG png;
@@ -291,8 +293,6 @@ void setup() {
   watch.setRotation(2);
 
   watch.fillScreen(RGB565_BLACK_OUTER_SPACE);
-  drawSplash();
-  watch.fillScreen(RGB565_BLACK_OUTER_SPACE);
 
   switch (devicemode) {
     case 0:
@@ -332,22 +332,23 @@ void setup() {
         Serial.println("ERROR: error reading config from FS");
       }
       Serial.println("initialization complete");
-      drawSplash();
+      ui_init();  // Initialize the UI
       break;
   }
 }
 
 void loop() {
 
-  set_devicemode(4);  // FIXME: set devicemode to 1, for now, remove later
+  //set_devicemode(4);  // FIXME: set devicemode to 1, for now, remove later
 
   if (STATUS_CONFIG_DATA_OK) {
-    drawMain();
+    //drawMain();
   } else {
     // print error message to screen
-    drawError("ERROR: config data not available");
+    //drawError("ERROR: config data not available");
   }
-  delay(100000);  // wait for 100 second
+  lv_task_handler();
+  delay(5);
 }
 
 static uint8_t conv2d(const char *p) {

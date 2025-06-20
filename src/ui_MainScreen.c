@@ -5,12 +5,12 @@
 
 #include "ui.h"
 
-lv_obj_t *ui_Screen1 = NULL;
+lv_obj_t *ui_MainScreen = NULL;
 lv_obj_t *ui_ActivePicto = NULL;
 lv_obj_t *ui_TopPanel = NULL;
 lv_obj_t *ui_Bolletjes = NULL;
-// event functions
-void ui_event_Screen1(lv_event_t *e) {
+// event funtions
+void ui_event_MainScreen(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
@@ -21,15 +21,23 @@ void ui_event_Screen1(lv_event_t *e) {
     lv_indev_wait_release(lv_indev_get_act());
     rightSwipe(e);
   }
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_BOTTOM) {
+    lv_indev_wait_release(lv_indev_get_act());
+    setActivityDone(e);
+  }
+  if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_TOP) {
+    lv_indev_wait_release(lv_indev_get_act());
+    setActivityUndone(e);
+  }
 }
 
-// build functions
+// build funtions
 
-void ui_Screen1_screen_init(void) {
-  ui_Screen1 = lv_obj_create(NULL);
-  lv_obj_clear_flag(ui_Screen1, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
+void ui_MainScreen_screen_init(void) {
+  ui_MainScreen = lv_obj_create(NULL);
+  lv_obj_clear_flag(ui_MainScreen, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
 
-  ui_ActivePicto = lv_img_create(ui_Screen1);
+  ui_ActivePicto = lv_img_create(ui_MainScreen);
   lv_obj_set_width(ui_ActivePicto, 140);
   lv_obj_set_height(ui_ActivePicto, 140);
   lv_obj_set_x(ui_ActivePicto, 0);
@@ -38,7 +46,7 @@ void ui_Screen1_screen_init(void) {
   lv_obj_add_flag(ui_ActivePicto, LV_OBJ_FLAG_ADV_HITTEST);   /// Flags
   lv_obj_clear_flag(ui_ActivePicto, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
 
-  ui_TopPanel = lv_obj_create(ui_Screen1);
+  ui_TopPanel = lv_obj_create(ui_MainScreen);
   lv_obj_set_width(ui_TopPanel, 230);
   lv_obj_set_height(ui_TopPanel, 30);
   lv_obj_set_x(ui_TopPanel, 0);
@@ -46,7 +54,7 @@ void ui_Screen1_screen_init(void) {
   lv_obj_set_align(ui_TopPanel, LV_ALIGN_CENTER);
   lv_obj_clear_flag(ui_TopPanel, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
 
-  ui_Bolletjes = lv_obj_create(ui_Screen1);
+  ui_Bolletjes = lv_obj_create(ui_MainScreen);
   lv_obj_remove_style_all(ui_Bolletjes);
   lv_obj_set_width(ui_Bolletjes, 210);
   lv_obj_set_height(ui_Bolletjes, 25);
@@ -55,17 +63,21 @@ void ui_Screen1_screen_init(void) {
   lv_obj_set_align(ui_Bolletjes, LV_ALIGN_CENTER);
   lv_obj_clear_flag(ui_Bolletjes, LV_OBJ_FLAG_CLICKABLE | LV_OBJ_FLAG_SCROLLABLE);  /// Flags
 
-  lv_obj_add_event_cb(ui_Screen1, ui_event_Screen1, LV_EVENT_ALL, NULL);
+  lv_obj_add_event_cb(ui_MainScreen, ui_event_MainScreen, LV_EVENT_ALL, NULL);
 }
 
-void ui_Screen1_screen_destroy(void) {
-  if (ui_Screen1) {
-    lv_obj_del(ui_Screen1);
+void ui_MainScreen_screen_destroy(void) {
+  if (ui_MainScreen) {
+    lv_obj_del(ui_MainScreen);
   }
 
   // NULL screen variables
-  ui_Screen1 = NULL;
+  ui_MainScreen = NULL;
   ui_ActivePicto = NULL;
   ui_TopPanel = NULL;
   ui_Bolletjes = NULL;
+}
+
+void ui_MainScreen_screen_relocalize(void) {
+  // label widgets on screen
 }

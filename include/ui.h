@@ -16,7 +16,9 @@ extern "C" {
 #include "ui_events.h"
 
 ///////////////////// SCREENS ////////////////////
-#include "ui_Screen1.h"
+#include "ui_MainScreen.h"
+#include "ui_SplashScreen.h"
+#include "ui_ConfigScreen.h"
 
 ///////////////////// VARIABLES ////////////////////
 
@@ -26,6 +28,7 @@ extern lv_obj_t *ui____initial_actions0;
 // UI INIT
 void ui_init(void);
 void ui_destroy(void);
+void ui_relocalize(void);
 
 #ifdef __cplusplus
 } /*extern "C"*/

@@ -12,6 +12,8 @@ extern "C" {
 
 void leftSwipe(lv_event_t *e);
 void rightSwipe(lv_event_t *e);
+void setActivityDone(lv_event_t *e);
+void setActivityUndone(lv_event_t *e);
 
 #ifdef __cplusplus
 } /*extern "C"*/

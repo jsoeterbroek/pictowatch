@@ -12,3 +12,11 @@ void leftSwipe(lv_event_t *e) {
 void rightSwipe(lv_event_t *e) {
   // Your code here
 }
+
+void setActivityDone(lv_event_t *e) {
+  // Your code here
+}
+
+void setActivityUndone(lv_event_t *e) {
+  // Your code here
+}

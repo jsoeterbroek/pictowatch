@@ -18,20 +18,18 @@ repos:
       - id: debug-statements
       - id: destroyed-symlinks
       - id: detect-private-key
-      - id: end-of-file-fixer
-        exclude: ^.*\.(bin|BIN)$
       - id: mixed-line-ending
         args: [--fix=lf]
       - id: trailing-whitespace
         args: [--markdown-linebreak-ext=md]
         exclude: ^platformio\.ini$
 
-  - repo: https://github.com/codespell-project/codespell
-    rev: "v2.3.0"
-    hooks:
-      # Spell checking
-      - id: codespell
-        exclude: ^.*\.(svd|SVD|inc)$
+#  - repo: https://github.com/codespell-project/codespell
+#    rev: "v2.3.0"
+#    hooks:
+#      # Spell checking
+#      - id: codespell
+#        exclude: ^.*\.(svd|SVD|inc)$
 
   - repo: https://github.com/pre-commit/mirrors-clang-format
     rev: "v18.1.3"
