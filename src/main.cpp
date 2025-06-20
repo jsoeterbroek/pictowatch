@@ -20,15 +20,6 @@
 JsonDocument cdoc;
 PNG png;
 
-#define GFXFF 1
-#define FF18  &FreeSans12pt7b
-// Custom are fonts added to library "TFT_eSPI\Fonts\Custom" folder
-#define CF_OL24 &Orbitron_Light_24
-#define CF_OL32 &Orbitron_Light_32
-#define CF_RT24 &Roboto_Thin_24
-#define CF_S24  &Satisfy_24
-#define CF_Y32  &Yellowtail_32
-
 float sx = 0, sy = 1, mx = 1, my = 0, hx = -1, hy = 0;  // Saved H, M, S x & y multipliers
 float sdeg = 0, mdeg = 0, hdeg = 0;
 uint16_t osx = 120, osy = 120, omx = 120, omy = 120, ohx = 120, ohy = 120;  // Saved H, M, S x & y coords
@@ -124,11 +115,10 @@ void drawSplash() {
 
   watch.fillScreen(RGB565_BLACK_OUTER_SPACE);
   watch.setTextDatum(ML_DATUM);
-  watch.setFreeFont(CF_OL24);
   watch.setTextColor(RGB565_GRAY_LIGHT);
-  watch.drawString("PictoWatch", 32, 80, GFXFF);
-  watch.drawString("Version 1.0.0", 32, 110, GFXFF);
-  watch.drawString("Prototype", 32, 140, GFXFF);
+  watch.drawString("PictoWatch", 32, 80, 0);
+  watch.drawString("Version 1.0.0", 32, 110, 0);
+  watch.drawString("Prototype", 32, 140, 0);
   delay(10000);
 }
 
@@ -180,7 +170,6 @@ void drawMain() {
   //Serial.println("***************");
 
   watch.setTextDatum(ML_DATUM);
-  watch.setFreeFont(CF_OL24);
 
   // top day part
   watch.fillRect(0, 0, 80, 30, TOP_RECT_BG_COLOR_1);
