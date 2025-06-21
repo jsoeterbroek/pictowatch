@@ -25,11 +25,11 @@ void incr_pspref_brightness();
 void decr_pspref_brightness();
 
 // Current activity
-void set_pspref_current_activity_index(int pspref_current_activity_index);
-int get_pspref_current_activity_index();
 #ifdef __cplusplus
 extern "C" {
 #endif
+void set_pspref_current_activity_index(int pspref_current_activity_index);
+int get_pspref_current_activity_index();
 void incr_pspref_current_activity_index(int _pspref_current_activity_index);
 void decr_pspref_current_activity_index(int _pspref_current_activity_index);
 void set_pspref_activity_done(int pspref_current_activity_index);
