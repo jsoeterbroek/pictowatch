@@ -27,7 +27,7 @@ void ui_init(void) {
   lv_theme_t *theme = lv_theme_default_init(dispp, lv_palette_main(LV_PALETTE_BLUE), lv_palette_main(LV_PALETTE_RED), false, LV_FONT_DEFAULT);
   lv_disp_set_theme(dispp, theme);
   ui_MainScreen_screen_init();
-  ui_SplashScreen_screen_init();
+  //ui_SplashScreen_screen_init();
   ui_ConfigScreen_screen_init();
   ui____initial_actions0 = lv_obj_create(NULL);
   lv_disp_load_scr(ui_MainScreen);
@@ -35,7 +35,7 @@ void ui_init(void) {
 
 void ui_destroy(void) {
   ui_MainScreen_screen_destroy();
-  ui_SplashScreen_screen_destroy();
+  //ui_SplashScreen_screen_destroy();
   ui_ConfigScreen_screen_destroy();
 }
 

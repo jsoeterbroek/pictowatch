@@ -1,18 +1,18 @@
 #include <ArduinoJson.h>
 #include <colors.h>
 
-#define PD_VERSION_MAJOR 1
-#define PD_VERSION_MINOR 3
-#define PD_VERSION_PATCH 1
+#define PW_VERSION_MAJOR 1
+#define PW_VERSION_MINOR 0
+#define PW_VERSION_PATCH 0
 
-static inline int pd_version_major(void) {
-  return PD_VERSION_MAJOR;
+static inline int pw_version_major(void) {
+  return PW_VERSION_MAJOR;
 }
-static inline int pd_version_minor(void) {
-  return PD_VERSION_MINOR;
+static inline int pw_version_minor(void) {
+  return PW_VERSION_MINOR;
 }
-static inline int pd_version_patch(void) {
-  return PD_VERSION_PATCH;
+static inline int pw_version_patch(void) {
+  return PW_VERSION_PATCH;
 }
 
 // status flags
@@ -23,10 +23,9 @@ boolean STATUS_TIME_OK = false;
 boolean STATUS_NTP_OK = false;
 boolean STATUS_CONFIG_DATA_OK = false;
 boolean STATUS_BLE_OK = false;
-boolean STATUS_GET_CONFIG_DATA_FS_OK = false;
-boolean STATUS_SET_CONFIG_DATA_FS_OK = false;
+boolean STATUS_GET_CONFIG_DATA_SPIFF_OK = false;
+boolean STATUS_SET_CONFIG_DATA_SPIFF_OK = false;
 boolean STATUS_GET_CONFIG_DATA_HTTP_OK = false;
-
 boolean GET_CONFIG_DATA_HTTP = false;
 boolean GET_CONFIG_DATA_SPIFF = true;
 

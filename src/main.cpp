@@ -15,6 +15,10 @@
 #include <AsyncMessagePack.h>
 #include <time.h>
 
+#include <ESPAsyncWebServer.h>
+#include <AsyncJson.h>
+#include <AsyncMessagePack.h>
+
 // ui stuff
 #include "ui.h"
 
@@ -22,9 +26,11 @@ uint32_t lastMillis;
 char buf[64];
 
 lv_obj_t *Timelabel;
+lv_obj_t *Bolletjeslabel;
 
 JsonDocument cdoc;
 PNG png;
+struct tm timeinfo;
 
 float sx = 0, sy = 1, mx = 1, my = 0, hx = -1, hy = 0;  // Saved H, M, S x & y multipliers
 float sdeg = 0, mdeg = 0, hdeg = 0;
@@ -37,8 +43,149 @@ uint8_t hh = conv2d(__TIME__), mm = conv2d(__TIME__ + 3), ss = conv2d(__TIME__ +
 bool initial = 1;
 #define FORMAT_LITTLEFS_IF_FAILED true
 
+// AsyncWebserver
+static AsyncWebServer server(80);
+
+// processor placeholder
+String processor(const String &var) {
+  String foo = "bar";
+  return foo;
+}
+
+void init_ESPAsync_Ws() {
+
+  // mount SPIFFS
+  Serial.println("Mounting SPIFFS...");
+  if (!SPIFFS.begin(FORMAT_SPIFFS_IF_FAILED)) {
+    Serial.println("SPIFFS Mount Failed");
+    return;
+  }
+  if (!SPIFFS.exists("/index.html")) {
+    Serial.println("ERROR: index.html not found in SPIFFS");
+    Serial.println("Please upload the web files to SPIFFS");
+    return;
+  }
+
+  // Route for root / web page
+  server.on("/", HTTP_GET, [](AsyncWebServerRequest *request) {
+    request->send(SPIFFS, "/index.html", "text/html", false, processor);
+  });
+
+  // Route to get list of available pictos
+  server.on("/get-pictos", HTTP_GET, [](AsyncWebServerRequest *request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+    JsonDocument doc;
+    JsonArray pictos = doc.to<JsonArray>();
+
+    File root = SPIFFS.open("/picto");
+    if (!root || !root.isDirectory()) {
+      response->print("[]");
+      request->send(response);
+      return;
+    }
+
+    File file = root.openNextFile();
+    while (file) {
+      if (!file.isDirectory()) {
+        String filename = file.name();
+        if (filename.endsWith(".png")) {
+          // Remove path prefix if present
+          int lastSlash = filename.lastIndexOf('/');
+          if (lastSlash >= 0) {
+            filename = filename.substring(lastSlash + 1);
+          }
+          // Remove .png extension for the name
+          String pictoName = filename.substring(0, filename.length() - 4);
+
+          JsonObject picto = pictos.add<JsonObject>();
+          picto["filename"] = filename;
+          picto["name"] = pictoName;
+        }
+      }
+      file = root.openNextFile();
+    }
+    root.close();
+
+    serializeJson(doc, *response);
+    request->send(response);
+  });
+
+  // Route to handle JSON configuration save
+  AsyncCallbackJsonWebHandler *handler = new AsyncCallbackJsonWebHandler("/save-config", [](AsyncWebServerRequest *request, JsonVariant &json) {
+    Serial.println("Received JSON configuration");
+
+    // Write the JSON to data.json file
+    File file = SPIFFS.open("/data.json", FILE_WRITE);
+    if (!file) {
+      Serial.println("Failed to open data.json for writing");
+      request->send(500, "text/plain", "Failed to save configuration");
+      return;
+    }
+
+    // Write JSON to file
+    serializeJson(json, file);
+    file.close();
+
+    Serial.println("Configuration saved to data.json");
+    request->send(200, "text/plain", "Configuration saved successfully");
+
+    // Update the global config document
+    cdoc.clear();
+    cdoc = json;
+    STATUS_CONFIG_DATA_OK = true;
+    STATUS_SET_CONFIG_DATA_SPIFF_OK = true;
+  });
+  server.addHandler(handler);
+
+  server.serveStatic("/", SPIFFS, "/");
+
+  // Route to get current configuration
+  server.on("/get-config", HTTP_GET, [](AsyncWebServerRequest *request) {
+    AsyncResponseStream *response = request->beginResponseStream("application/json");
+
+    File file = SPIFFS.open("/data.json", FILE_READ);
+    if (file) {
+      String content = file.readString();
+      file.close();
+      response->print(content);
+    } else {
+      response->print("{}");
+    }
+
+    request->send(response);
+  });
+
+  server.begin();
+}
+
+void setTimezone(String timezone) {
+  Serial.printf("  Setting Timezone to %s\n", timezone.c_str());
+  setenv("TZ", timezone.c_str(), 1);
+  //  Now adjust the TZ.  Clock settings are adjusted to show the
+  //  new local time
+  tzset();
+}
+
+void initTime(String timezone) {
+  Serial.println(" ");
+  Serial.print("connecting to time server ");
+  Serial.println(" ");
+  // Init and get the time
+  configTime(0, 0, ntpServer);
+  delay(500);
+  setTimezone(timezone);
+  delay(100);
+  if (!getLocalTime(&timeinfo)) {
+    Serial.println("ERROR: failed to obtain time");
+    delay(10000);
+  } else {
+    Serial.println("OK: obtained time");
+    Serial.println(&timeinfo, " %A, %B %d %Y %H:%M:%S");
+    STATUS_NTP_OK = true;
+  }
+}
+
 void writeConfigFile(fs::FS &fs, const char *path, JsonObject _json) {
-  STATUS_SET_CONFIG_DATA_FS_OK = false;
 
   Serial.printf("");                                   // FIXME, remove later
   Serial.printf("Writing config file: %s\r\n", path);  // FIXME, remove later
@@ -52,11 +199,11 @@ void writeConfigFile(fs::FS &fs, const char *path, JsonObject _json) {
     if (serializeJson(_json, myfile) == 0) {
       Serial.print(F("Failed write to file "));
       Serial.println(F(path));
-      STATUS_SET_CONFIG_DATA_FS_OK = false;
+      STATUS_SET_CONFIG_DATA_SPIFF_OK = false;
     } else {
       Serial.print(F("Success write to file "));
       Serial.println(F(path));
-      STATUS_SET_CONFIG_DATA_FS_OK = true;
+      STATUS_SET_CONFIG_DATA_SPIFF_OK = true;
     }
   }
   // Close the file
@@ -64,7 +211,6 @@ void writeConfigFile(fs::FS &fs, const char *path, JsonObject _json) {
 }
 
 void readConfigFile(fs::FS &fs, const char *path) {
-  STATUS_GET_CONFIG_DATA_FS_OK = false;
 
   static uint8_t buf[512];
   size_t len = 0;
@@ -76,7 +222,7 @@ void readConfigFile(fs::FS &fs, const char *path) {
     DeserializationError error = deserializeJson(cdoc, cfile);
     if (!error) {
       Serial.println("deserializeJson OK");
-      STATUS_GET_CONFIG_DATA_FS_OK = true;
+      STATUS_GET_CONFIG_DATA_SPIFF_OK = true;
     } else {
       Serial.print("ERROR: deserializeJson returned ");
       Serial.println(error.c_str());
@@ -141,9 +287,7 @@ void drawError(const char *message) {
 
 void drawMain() {
 
-  watch.fillScreen(BG_COLOR);
-
-  // extract values from config JSON object
+  // // extract values from config JSON object
   config_activities_size = cdoc["activities"].size();
   config_name = cdoc["name"];  // "Peter"
 
@@ -161,47 +305,47 @@ void drawMain() {
 
   ps_current_activity_index = get_pspref_current_activity_index();
 
-  //Serial.println("***************");
-  // Serial.println(" ");
-  // Serial.print("DEBUG: current activity index: ");
-  // Serial.println(ps_current_activity_index);
-  // Serial.println(" ");
-  // Serial.print("DEBUG: this activity is: ");
-  // if (get_pspref_activity_done(ps_current_activity_index) == 1) {
-  //   Serial.println("done");
-  // } else {
-  //   Serial.println("todo");
-  // }
-  //Serial.print(config_name);
-  //Serial.println("***************");
+  Serial.println("***************");
+  Serial.print("DEBUG: current activity index: ");
+  Serial.println(ps_current_activity_index);
+  Serial.print("DEBUG: this activity is: ");
+  if (get_pspref_activity_done(ps_current_activity_index) == 1) {
+    Serial.println("done");
+  } else {
+    Serial.println("todo");
+  }
+  Serial.println("***************");
 
-  watch.setTextDatum(ML_DATUM);
+  // Get the time C library structure from RTC
+  watch.getDateTime(&timeinfo);
+  size_t written = strftime(buf, 64, "%b %d %Y %H:%M:%S", &timeinfo);
+  if (written != 0) {
+    lv_label_set_text(Timelabel, buf);
+    Serial.println(buf);
+  }
 
-  // top day part
-  watch.fillRect(0, 0, 80, 30, TOP_RECT_BG_COLOR_1);
-  watch.setTextColor(TOP_RECT_TEXT_COLOR_1, TOP_RECT_BG_COLOR_1);
-  watch.drawString("Mon", 4, 12);
+  // // top day part
+  // watch.fillRect(0, 0, 80, 30, TOP_RECT_BG_COLOR_1);
+  // watch.setTextColor(TOP_RECT_TEXT_COLOR_1, TOP_RECT_BG_COLOR_1);
+  // watch.drawString("Mon", 4, 12);
 
-  // top time part
-  watch.fillRect(80, 0, 80, 30, TOP_RECT_BG_COLOR_1);
-  watch.setTextColor(TOP_RECT_TEXT_COLOR_1, TOP_RECT_BG_COLOR_1);
-  watch.drawString("13:00", 84, 12);
+  // // top time part
+  // watch.fillRect(80, 0, 80, 30, TOP_RECT_BG_COLOR_1);
+  // watch.setTextColor(TOP_RECT_TEXT_COLOR_1, TOP_RECT_BG_COLOR_1);
+  // watch.drawString("13:00", 84, 12);
 
-  // top batt part
-  watch.fillRect(160, 0, 80, 30, TOP_RECT_BG_COLOR_1);
-  watch.setTextColor(TOP_RECT_TEXT_COLOR_1, TOP_RECT_BG_COLOR_1);
-  watch.drawString("  batt", 164, 12);
-
-  // picto part
-  watch.fillSmoothRoundRect(48, 48, picto_box_width, picto_box_height, 5, FG_COLOR, BG_COLOR);
+  // // top batt part
+  // watch.fillRect(160, 0, 80, 30, TOP_RECT_BG_COLOR_1);
+  // watch.setTextColor(TOP_RECT_TEXT_COLOR_1, TOP_RECT_BG_COLOR_1);
+  // watch.drawString("  batt", 164, 12);
 
   // by default, if there is no current activity, the first one will be current
   for (int i = 0; i < config_activities_size; i++) {
     // current
     if (i == ps_current_activity_index) {
       // draw the picto
-      Serial.print("Drawing current activity picto: ");  // FIXME: remove later
-      Serial.print(_array_picto[i]);                     // FIXME: remove later
+      //Serial.print("Drawing current activity picto: ");  // FIXME: remove later
+      //Serial.println(_array_picto[i]);                     // FIXME: remove later
       drawPicto(_array_picto[i]);
 
       // now check if this activity is marked done in
@@ -251,10 +395,6 @@ void drawMain() {
       _circle_x = _circle_x + _dist_between;
     }
   }
-
-  // touch screen actions
-
-  // button actions
 }
 
 void setup() {
@@ -320,7 +460,7 @@ void setup() {
         getConfigData();
       }
       // TODO: make check for md5sum checksum of config file
-      if (STATUS_GET_CONFIG_DATA_FS_OK) {
+      if (STATUS_GET_CONFIG_DATA_SPIFF_OK) {
         STATUS_CONFIG_DATA_OK = true;
         Serial.println("config successfully read from FS");
       } else {
@@ -330,6 +470,7 @@ void setup() {
       ui_init();  // Initialize the UI
       Timelabel = lv_label_create(ui_TopPanel);
       lv_obj_set_width(Timelabel, LV_PCT(90)); /*Set smaller width to make the lines wrap*/
+      Bolletjeslabel = lv_label_create(ui_Bolletjes);
       break;
   }
 }
@@ -347,15 +488,14 @@ void loop() {
 
     lastMillis = millis();
 
-    struct tm timeinfo;
-    // Get the time C library structure
-    watch.getDateTime(&timeinfo);
-    size_t written = strftime(buf, 64, "%A, %B %d %Y %H:%M:%S", &timeinfo);
+    // // Bolletjeslabel
+    // bolletjes = strftime(buf, 64, "%b %d %Y %H:%M:%S", &timeinfo);
 
-    if (written != 0) {
-      lv_label_set_text(Timelabel, buf);
-      Serial.println(buf);
-    }
+    // if (bolletjes != 0) {
+    //   lv_label_set_text(Bolletjeslabel, buf);
+    //   Serial.println(buf);
+    // }
+    drawMain();
   }
 
   lv_task_handler();

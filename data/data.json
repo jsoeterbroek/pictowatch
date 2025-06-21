@@ -8,7 +8,7 @@
         },
         {
             "order": "002",
-            "picto": "toothbrush.png",
+            "picto": "bus.png",
             "description": "Brush teeth"
         },
         {
@@ -18,7 +18,7 @@
         },
         {
             "order": "004",
-            "picto": "breakfast.png",
+            "picto": "wash.png",
             "description": "Breakfast"
         },
         {
@@ -28,7 +28,7 @@
         },
         {
             "order": "006",
-            "picto": "lunch.png",
+            "picto": "theater.png",
             "description": "Lunch"
         },
         {
