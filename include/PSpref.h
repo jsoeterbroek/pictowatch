@@ -32,6 +32,9 @@ extern "C" {
 #endif
 void incr_pspref_current_activity_index(int _pspref_current_activity_index);
 void decr_pspref_current_activity_index(int _pspref_current_activity_index);
+void set_pspref_activity_done(int pspref_current_activity_index);
+void set_pspref_activity_undone(int pspref_current_activity_index);
+int get_pspref_activity_done(int _pspref_current_activity_index);
 #ifdef __cplusplus
 }
 #endif
@@ -42,6 +45,3 @@ void incr_pspref_timeout();
 void decr_pspref_timeout();
 
 // reserve for 20 activities max
-void set_pspref_activity_done(int pspref_current_activity_index);
-void set_pspref_activity_undone(int pspref_current_activity_index);
-int get_pspref_activity_done(int _pspref_current_activity_index);

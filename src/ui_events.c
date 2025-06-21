@@ -16,11 +16,11 @@ void rightSwipe(lv_event_t *e) {
 }
 
 void setActivityDone(lv_event_t *e) {
-  setActivityDone(pspref_current_activity_index);
+  set_pspref_activity_done(pspref_current_activity_index);
 }
 
 void setActivityUndone(lv_event_t *e) {
-  setActivityUndone(pspref_current_activity_index);
+  set_pspref_activity_undone(pspref_current_activity_index);
 }
 #ifdef __cplusplus
 } /*extern "C"*/
