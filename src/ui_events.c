@@ -22,6 +22,11 @@ void setActivityDone(lv_event_t *e, int _pspref_current_activity_index) {
 void setActivityUndone(lv_event_t *e, int _pspref_current_activity_index) {
   set_pspref_activity_undone(_pspref_current_activity_index);
 }
+
+void btnActivityClicked(lv_event_t *e, int _pspref_current_activity_index) {
+  // Your code here
+}
+
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif
