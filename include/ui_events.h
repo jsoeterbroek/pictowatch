@@ -5,10 +5,10 @@
 extern "C" {
 #endif
 
-void leftSwipe(lv_event_t *e);
-void rightSwipe(lv_event_t *e);
-void setActivityDone(lv_event_t *e);
-void setActivityUndone(lv_event_t *e);
+void leftSwipe(lv_event_t *e, int _pspref_current_activity_index);
+void rightSwipe(lv_event_t *e, int _pspref_current_activity_index);
+void setActivityDone(lv_event_t *e, int _pspref_current_activity_index);
+void setActivityUndone(lv_event_t *e, int _pspref_current_activity_index);
 
 #ifdef __cplusplus
 } /*extern "C"*/

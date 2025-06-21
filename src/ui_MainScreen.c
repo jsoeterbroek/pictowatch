@@ -8,22 +8,26 @@ lv_obj_t *ui_Bolletjes = NULL;
 // event functions
 void ui_event_MainScreen(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
+  int _pspref_current_activity_index = 0;
+  if (lv_event_get_user_data(e)) {
+    _pspref_current_activity_index = *((int *)lv_event_get_user_data(e));
+  }
 
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
     lv_indev_wait_release(lv_indev_get_act());
-    leftSwipe(e);
+    leftSwipe(e, _pspref_current_activity_index);
   }
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_RIGHT) {
     lv_indev_wait_release(lv_indev_get_act());
-    rightSwipe(e);
+    rightSwipe(e, _pspref_current_activity_index);
   }
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_BOTTOM) {
     lv_indev_wait_release(lv_indev_get_act());
-    setActivityDone(e);
+    setActivityDone(e, _pspref_current_activity_index);
   }
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_TOP) {
     lv_indev_wait_release(lv_indev_get_act());
-    setActivityUndone(e);
+    setActivityUndone(e, _pspref_current_activity_index);
   }
 }
 
