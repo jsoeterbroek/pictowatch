@@ -9,9 +9,6 @@ lv_obj_t *ui_Bolletjes = NULL;
 void ui_event_MainScreen(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
   int _pspref_current_activity_index = 0;
-  // if (lv_event_get_user_data(e)) {
-  //   _pspref_current_activity_index = *((int *)lv_event_get_user_data(e));
-  // }
   _pspref_current_activity_index = get_pspref_current_activity_index();
 
   if (event_code == LV_EVENT_GESTURE && lv_indev_get_gesture_dir(lv_indev_get_act()) == LV_DIR_LEFT) {
@@ -55,9 +52,9 @@ void ui_MainScreen_screen_init(void) {
   lv_obj_clear_flag(ui_TopPanel, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
 
   ui_Bolletjes = lv_obj_create(ui_MainScreen);
-  lv_obj_remove_style_all(ui_Bolletjes);
-  lv_obj_set_width(ui_Bolletjes, 210);
-  lv_obj_set_height(ui_Bolletjes, 25);
+  //lv_obj_remove_style_all(ui_Bolletjes);
+  lv_obj_set_width(ui_Bolletjes, 214);
+  lv_obj_set_height(ui_Bolletjes, 28);
   lv_obj_set_x(ui_Bolletjes, -2);
   lv_obj_set_y(ui_Bolletjes, 95);
   lv_obj_set_align(ui_Bolletjes, LV_ALIGN_CENTER);

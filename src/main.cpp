@@ -386,6 +386,8 @@ void drawMain() {
       // small indicator (rectangle) for the current activity
       if (i == ps_current_activity_index) {
         watch.fillRect(_circle_x - 8, 219, 16, 6, DAYPERIOD_CIRCLE_BG_COLOR);
+      } else {
+        watch.fillRect(_circle_x - 8, 219, 16, 6, BG_COLOR);
       }
       if (get_pspref_activity_done(i) == 1) {
         watch.fillSmoothCircle(_circle_x, 212, _size_circle, COLOR_DONE, BG_COLOR);
