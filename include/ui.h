@@ -8,6 +8,7 @@
 
 #ifdef __cplusplus
 extern "C" {
+#include "PSpref.h"
 #endif
 
 #include "lvgl.h"
@@ -33,5 +34,4 @@ void ui_relocalize(void);
 #ifdef __cplusplus
 } /*extern "C"*/
 #endif
-
 #endif

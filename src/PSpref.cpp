@@ -71,6 +71,28 @@ void decr_pspref_brightness(void) {
   }
 }
 
+void incr_pspref_current_activity_index(int _pspref_current_activity_index) {
+  int _rc = get_pspref_current_activity_index();
+  if (_rc < 19) {
+    _rc++;
+    set_pspref_current_activity_index(_rc);
+  } else {
+    _rc = 0;  // wrap around to first activity
+    set_pspref_current_activity_index(_rc);
+  }
+}
+
+void decr_pspref_current_activity_index(int _pspref_current_activity_index) {
+  int _rc = get_pspref_current_activity_index();
+  if (_rc > 0) {
+    _rc--;
+    set_pspref_current_activity_index(_rc);
+  } else {
+    _rc = 19;  // wrap around to last activity
+    set_pspref_current_activity_index(_rc);
+  }
+}
+
 void set_pspref_current_activity_index(int _pspref_current_activity_index) {
   psPrefs.end();
   psPrefs.begin(PSNS, PS_RW_MODE);
