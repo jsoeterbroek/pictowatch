@@ -13,9 +13,15 @@
 #include <ArduinoJson.h>
 #include <AsyncJson.h>
 #include <AsyncMessagePack.h>
+#include <time.h>
 
 // ui stuff
 #include "ui.h"
+
+uint32_t lastMillis;
+char buf[64];
+
+lv_obj_t *Timelabel;
 
 JsonDocument cdoc;
 PNG png;
@@ -322,6 +328,8 @@ void setup() {
       }
       Serial.println("initialization complete");
       ui_init();  // Initialize the UI
+      Timelabel = lv_label_create(ui_TopPanel);
+      lv_obj_set_width(Timelabel, LV_PCT(90)); /*Set smaller width to make the lines wrap*/
       break;
   }
 }
@@ -330,12 +338,26 @@ void loop() {
 
   //set_devicemode(4);  // FIXME: set devicemode to 1, for now, remove later
 
-  if (STATUS_CONFIG_DATA_OK) {
-    //drawMain();
-  } else {
+  if (!STATUS_CONFIG_DATA_OK) {
     // print error message to screen
     //drawError("ERROR: config data not available");
   }
+
+  if (millis() - lastMillis > 1000) {
+
+    lastMillis = millis();
+
+    struct tm timeinfo;
+    // Get the time C library structure
+    watch.getDateTime(&timeinfo);
+    size_t written = strftime(buf, 64, "%A, %B %d %Y %H:%M:%S", &timeinfo);
+
+    if (written != 0) {
+      lv_label_set_text(Timelabel, buf);
+      Serial.println(buf);
+    }
+  }
+
   lv_task_handler();
   delay(5);
 }

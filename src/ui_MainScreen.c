@@ -4,7 +4,8 @@ lv_obj_t *ui_MainScreen = NULL;
 lv_obj_t *ui_ActivePicto = NULL;
 lv_obj_t *ui_TopPanel = NULL;
 lv_obj_t *ui_Bolletjes = NULL;
-// event funtions
+
+// event functions
 void ui_event_MainScreen(lv_event_t *e) {
   lv_event_code_t event_code = lv_event_get_code(e);
 
@@ -26,8 +27,7 @@ void ui_event_MainScreen(lv_event_t *e) {
   }
 }
 
-// build funtions
-
+// build functions
 void ui_MainScreen_screen_init(void) {
   ui_MainScreen = lv_obj_create(NULL);
   lv_obj_clear_flag(ui_MainScreen, LV_OBJ_FLAG_SCROLLABLE);  /// Flags
